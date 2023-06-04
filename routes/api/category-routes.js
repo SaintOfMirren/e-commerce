@@ -18,8 +18,14 @@ router.get('/:id', async (req, res) => {
   // find one category by its `id` value
   try {
     const categoryData = await Category.findByPk(req.params.id, {
-      // JOIN with products, using the tag through table
-      include: [{ model: Product, through: Tag, as: 'location_travellers' }]
+      include: [
+        {
+          model: Product,
+          through: { attributes: [] }, // Exclude ProductTag attributes
+          as: 'product_category',
+          include: [{ model: Tag, as: 'tags' }] // Include associated tags
+        }
+      ]
     });
 
     if (!categoryData) {
@@ -38,14 +44,30 @@ router.post('/', async (req, res) => {
   // create a new category
   try {
     const categoryData = await Category.create(req.body);
-    res.status(200).json(categoryData);
+    res.status(201).json(categoryData);
   } catch (err) {
-    res.status(400).json(err);
+    res.status(400).json({ error: 'Failed to create a new category' });
   }
 });
 
 router.put('/:id', async (req, res) => {
   // update a category by its `id` value
+  try {
+    const categoryData = await Category.update(req.body, {
+      where: {
+        id: req.params.id
+      }
+    });
+
+    if (!categoryData[0]) {
+      res.status(404).json({ message: 'No category found with this id!' });
+      return;
+    }
+
+    res.status(200).json({ message: 'Category updated successfully!' });
+  } catch (err) {
+    res.status(500).json(err);
+  }
 });
 
 router.delete('/:id', async (req, res) => {
