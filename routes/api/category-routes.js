@@ -22,7 +22,7 @@ router.get('/:id', async (req, res) => {
         {
           model: Product,
           through: { attributes: [] }, // Exclude ProductTag attributes
-          as: 'product_category',
+          as: 'products',
           include: [{ model: Tag, as: 'tags' }] // Include associated tags
         }
       ]
